@@ -9,8 +9,9 @@ describe("개별 테이블 read", () => {
     const { data, error } = await supabase.from("exams").select("*").limit(1);
 
     expect(error).toBeNull();
+    expect(data?.length).toBeGreaterThan(0);
     if (data && data.length > 0) {
-      const row = data[0] as Exam;
+      const row: Exam = data[0];
       expect(typeof row.id).toBe("string");
       expect(typeof row.name).toBe("string");
     }
@@ -21,8 +22,9 @@ describe("개별 테이블 read", () => {
     const { data, error } = await supabase.from("subjects").select("*").limit(1);
 
     expect(error).toBeNull();
+    expect(data?.length).toBeGreaterThan(0);
     if (data && data.length > 0) {
-      const row = data[0] as Subject;
+      const row: Subject = data[0];
       expect(typeof row.id).toBe("string");
       expect(typeof row.exam_id).toBe("string");
       expect(typeof row.slug).toBe("string");
@@ -35,8 +37,9 @@ describe("개별 테이블 read", () => {
     const { data, error } = await supabase.from("questions").select("*").limit(1);
 
     expect(error).toBeNull();
+    expect(data?.length).toBeGreaterThan(0);
     if (data && data.length > 0) {
-      const row = data[0] as Question;
+      const row: Question = data[0];
       expect(typeof row.id).toBe("string");
       expect(typeof row.exam_id).toBe("string");
       expect(typeof row.year).toBe("number");
@@ -51,8 +54,9 @@ describe("개별 테이블 read", () => {
     const { data, error } = await supabase.from("options").select("*").limit(5);
 
     expect(error).toBeNull();
+    expect(data?.length).toBeGreaterThan(0);
     if (data && data.length > 0) {
-      const row = data[0] as Option;
+      const row: Option = data[0];
       expect(typeof row.id).toBe("string");
       expect(typeof row.question_id).toBe("string");
       expect(typeof row.number).toBe("number");

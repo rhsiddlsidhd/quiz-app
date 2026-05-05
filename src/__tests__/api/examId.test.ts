@@ -5,10 +5,9 @@ import { GET } from "@/app/api/[examId]/route";
 
 const makeRequest = (url: string) => new NextRequest(url);
 
-const makeParams = (examId: string) =>
-  ({ params: Promise.resolve({ examId }) }) as {
-    params: Promise<{ examId: string }>;
-  };
+const makeParams = (examId: string): { params: Promise<{ examId: string }> } => ({
+  params: Promise.resolve({ examId }),
+});
 
 describe("GET /api/[examId]", () => {
   it("유효한 examId → { success: true } 반환", async () => {

@@ -12,7 +12,8 @@
     "test:coverage": "vitest run --coverage",
     "test:unit": "vitest run src/__tests__/unit",
     "test:integration": "vitest run src/__tests__/integration",
-    "test:api": "vitest run src/__tests__/api"
+    "test:api": "vitest run src/__tests__/api",
+    "seed": "npx tsx scripts/seed.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.3",

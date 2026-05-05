@@ -51,6 +51,39 @@
     - [x] `app/error.tsx` — 글로벌 에러 바운더리
     - [x] `next build` + `tsc --noEmit` 최종 통과 확인
 
+  - [x] Phase 1.5: 스키마 & 연동 검증 (테스트)
+
+    ### Test 1 — 환경 변수 로드 확인 (최소 단위)
+    - [x] `npm run dev` 실행 후 서버 기동 확인
+    - [x] `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` 가 undefined 아닌지 확인
+
+    ### Test 2 — Supabase 클라이언트 연결
+    - [x] `createClient()` 호출 후 에러 없이 인스턴스 생성되는지 확인
+    - [x] `.from("exams").select("*")` 쿼리 실행 → 응답 status 200 확인
+
+    ### Test 3 — 개별 테이블 read (단위별)
+    - [x] `exams` 테이블 select → 데이터 구조 Exam 타입과 일치 확인
+    - [x] `subjects` 테이블 select → Subject 타입 일치 확인
+    - [x] `questions` 테이블 select (limit 1) → Question 타입 일치 확인
+    - [x] `options` 테이블 select (limit 5) → Option 타입 일치 확인
+
+    ### Test 4 — RLS 정책 검증
+    - [x] anon key로 `exams` insert 시도 → RLS 오류 반환 확인
+    - [x] anon key로 `questions` update 시도 → 거부 확인
+
+    ### Test 5 — API 라우트 동작
+    - [x] `GET /api/[examId]` 호출 → `{ success: true, data: null }` 반환 확인
+    - [x] `examId` 없이 호출 → `{ success: false, error: "examId가 필요합니다." }` 확인
+
+    ### Test 6 — Storage 버킷 접근
+    - [x] `question-assets` 버킷 list 호출 → 접근 가능 확인
+    - [x] 버킷 public URL 형식 확인
+
+    ### Test 7 — 통합 흐름 (최대 단위)
+    - [x] exam → subjects → questions → options 순서로 join 조회
+    - [x] `QuestionWithOptions` 타입으로 정상 매핑되는지 확인
+    - [x] 전체 흐름이 server component에서 에러 없이 동작하는지 확인
+
   - [ ] Phase 2: UI 컴포넌트 구현
   - [ ] Phase 3: 로직 & 상태 관리 (훅, 서비스)
   - [ ] Phase 4: 페이지 조립

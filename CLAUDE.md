@@ -106,6 +106,7 @@
 
 ## 8. 참조문서
 
-- `TODO.md` — 전체 작업 목록
-- `memory/project_quiz_app.md` — 프로젝트 기획 방향
-- 하위 CLAUDE.md (추후 생성): `app/quiz/CLAUDE.md` 등
+| 파일 | 용도 |
+| ---- | ---- |
+| `TODO.md` | 전체 작업 목록 |
+| `src/__tests__/CLAUDE.md` | 테스트 구조 및 실행 가이드 (테스트 작업 시 반드시 먼저 읽기) |

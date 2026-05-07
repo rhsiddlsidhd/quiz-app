@@ -22,16 +22,17 @@
     - [x] `@/lib/supabase/server.ts` 작성 — 서버 전용 클라이언트
 
     ### Step 4 — Supabase 스키마 생성
-    - [x] `exams` 테이블 생성 (`id text PK`, `name text`)
-    - [x] `subjects` 테이블 생성 (`id uuid PK`, `exam_id text FK`, `slug text`, `name text`)
-    - [x] `questions` 테이블 생성 (`id uuid PK`, `exam_id`, `subject_id`, `year`, `round`, `number`, `content`, `view jsonb nullable`, `explanation text nullable`)
+    - [x] `exams` 테이블 생성 (`id text PK`, `category text`, `name text`, `year int`, `round int nullable`, UNIQUE(category,year,round))
+    - [x] `subjects` 테이블 생성 (`id uuid PK`, `category text`, `slug text`, `name text`)
+    - [x] `exam_subjects` junction 테이블 생성 (`exam_id text FK`, `subject_id uuid FK`, 복합 PK)
+    - [x] `questions` 테이블 생성 (`id uuid PK`, `exam_id text FK`, `subject_id uuid FK nullable`, `number int`, `content text`, `view jsonb nullable`, `explanation text nullable`)
     - [x] `options` 테이블 생성 (`id uuid PK`, `question_id uuid FK`, `number int`, `value text`, `is_answer bool`)
     - [x] Storage 버킷 `question-assets` 생성 (public)
     - [x] 각 테이블 RLS 정책 설정 (read-only public)
 
     ### Step 5 — TypeScript 타입 정의
     - [x] `@/types/index.ts` 생성 ✓ (snake_case 적용)
-          — `Exam`, `Subject`, `Question`, `Option` (DB Row 타입)
+          — `Exam` (category·year·round 포함), `Subject` (category 연결), `Question`, `Option`
           — `ViewBlock` (text / list / image / table 유니언)
           — `QuestionView` ({ blocks: ViewBlock[] })
           — `QuestionWithOptions`, `QuizSet`, `QuizMode`
@@ -64,16 +65,49 @@
     - [x] 환경 변수 존재 확인 (`connection.test.ts`)
     - [x] `createClient()` 인스턴스 생성 확인 (`connection.test.ts`)
     - [x] `exams` 테이블 select 성공 (`connection.test.ts`)
-    - [x] 각 테이블 타입 필드 일치 확인 (`tables.test.ts`: exams, subjects, questions, options)
+    - [x] 각 테이블 타입 필드 일치 확인 (`tables.test.ts`: exams, subjects, exam_subjects, questions, options)
 
     ### Integration 테스트 — CRUD
-    - [ ] service_role_key로 전 테이블 CRUD 검증 (`crud.test.ts`) 커밋
+    - [x] service_role_key로 전 테이블 CRUD 검증 (`crud.test.ts`) — 34 tests pass
+    - [ ] `crud.test.ts` · `WRITING_GUIDE.md` 커밋
 
     ### API 테스트
     - [x] `GET /api/[examId]` 정상 응답 형식 확인 (`api/examId.test.ts`)
     - [x] 빈 `examId` → 400·에러 메시지 확인 (`api/examId.test.ts`)
 
   - [ ] Phase 2: UI 컴포넌트 구현
+
+    > 디자인 참조: `DESIGN.md` (프롬프트 모음) · `.design/` (출력물)
+
+    ### Step 1 — 디자인 토큰 설정
+    - [ ] `tailwind.config.ts` 색상 토큰 확장
+          (`navy: #1a1f36`, `accent: #4f6ef7`, `surface: #f8f9fc`)
+
+    ### Step 2 — 공통 컴포넌트
+    - [ ] `<Button>` — primary / outline / ghost 변형
+    - [ ] `<Badge>` — 카테고리 뱃지
+    - [ ] `<Card>` — 흰색 카드 (그림자·모서리 반경)
+
+    ### Step 3 — 홈 화면 `/`
+    - [ ] `<ExamCard>` — 시험 제목·배지·문항 수·난이도
+    - [ ] `<ExamGrid>` — 2열(데스크탑) / 1열(모바일) 반응형 그리드
+
+    ### Step 4 — 선택 페이지 `/quiz/[examId]`
+    - [ ] `<ModeToggle>` — 미니 퀴즈 / 모의고사 토글 카드
+    - [ ] `<SubjectChips>` — 가로 스크롤 칩 버튼 (연도·회차는 exam에 내재, 선택 불필요)
+    - [ ] 하단 고정 `<StartButton>`
+
+    ### Step 5 — 퀴즈 진행 `/quiz/[examId]/play`
+    - [ ] `<ProgressBar>` — 현재/전체 진행률
+    - [ ] `<Timer>` — MM:SS 카운트다운
+    - [ ] `<QuestionCard>` — 문제 텍스트 카드
+    - [ ] `<OptionButton>` — A/B/C/D 라벨 + 선택 상태
+
+    ### Step 6 — 결과 화면 `/result`
+    - [ ] `<ScoreGauge>` — 원형 점수 게이지 (카운트업 애니메이션)
+    - [ ] `<StatRow>` — 정답·오답·미응답 아이콘+숫자
+    - [ ] `<SubjectBarChart>` — 과목별 가로 막대 차트
+
   - [ ] Phase 3: 로직 & 상태 관리 (훅, 서비스)
   - [ ] Phase 4: 페이지 조립
   - [ ] Phase 5: 시각화 & 마무리

@@ -3,9 +3,13 @@ import { describe, expect, it } from "vitest";
 import { AppError } from "@/lib/errors";
 
 describe("AppError", () => {
-  it("message와 status를 올바르게 저장한다", () => {
+  it("message를 올바르게 저장한다", () => {
     const err = new AppError("테스트 오류", 400);
     expect(err.message).toBe("테스트 오류");
+  });
+
+  it("status를 올바르게 저장한다", () => {
+    const err = new AppError("테스트 오류", 400);
     expect(err.status).toBe(400);
   });
 

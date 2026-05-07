@@ -7,19 +7,19 @@ describe("cn()", () => {
     expect(cn("foo")).toBe("foo");
   });
 
-  it("여러 클래스를 합친다", () => {
+  it("여러 클래스를 병합한다", () => {
     expect(cn("foo", "bar")).toBe("foo bar");
   });
 
-  it("falsy 값을 제거한다", () => {
-    expect(cn("foo", false, undefined, null, "bar")).toBe("foo bar");
+  it("falsy 값을 무시한다", () => {
+    expect(cn("foo", undefined, null, false, "bar")).toBe("foo bar");
   });
 
-  it("Tailwind 충돌 클래스를 마지막 값으로 병합한다", () => {
-    expect(cn("p-2", "p-4")).toBe("p-4");
+  it("Tailwind 충돌 클래스를 마지막 값으로 해결한다", () => {
+    expect(cn("p-4", "p-8")).toBe("p-8");
   });
 
   it("조건부 클래스를 처리한다", () => {
-    expect(cn("base", { active: true, hidden: false })).toBe("base active");
+    expect(cn("foo", { bar: true, baz: false })).toBe("foo bar");
   });
 });

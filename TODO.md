@@ -1,5 +1,3 @@
-# TODO — 2026-05-05
-
 ## 오늘의 작업
 
 - [ ] Quiz-app 만들기
@@ -24,16 +22,17 @@
     - [x] `@/lib/supabase/server.ts` 작성 — 서버 전용 클라이언트
 
     ### Step 4 — Supabase 스키마 생성
-    - [x] `exams` 테이블 생성 (`id text PK`, `name text`)
-    - [x] `subjects` 테이블 생성 (`id uuid PK`, `exam_id text FK`, `slug text`, `name text`)
-    - [x] `questions` 테이블 생성 (`id uuid PK`, `exam_id`, `subject_id`, `year`, `round`, `number`, `content`, `view jsonb nullable`, `explanation text nullable`)
+    - [x] `exams` 테이블 생성 (`id text PK`, `category text`, `name text`, `year int`, `round int nullable`, UNIQUE(category,year,round))
+    - [x] `subjects` 테이블 생성 (`id uuid PK`, `category text`, `slug text`, `name text`)
+    - [x] `exam_subjects` junction 테이블 생성 (`exam_id text FK`, `subject_id uuid FK`, 복합 PK)
+    - [x] `questions` 테이블 생성 (`id uuid PK`, `exam_id text FK`, `subject_id uuid FK nullable`, `number int`, `content text`, `view jsonb nullable`, `explanation text nullable`)
     - [x] `options` 테이블 생성 (`id uuid PK`, `question_id uuid FK`, `number int`, `value text`, `is_answer bool`)
     - [x] Storage 버킷 `question-assets` 생성 (public)
     - [x] 각 테이블 RLS 정책 설정 (read-only public)
 
     ### Step 5 — TypeScript 타입 정의
     - [x] `@/types/index.ts` 생성 ✓ (snake_case 적용)
-          — `Exam`, `Subject`, `Question`, `Option` (DB Row 타입)
+          — `Exam` (category·year·round 포함), `Subject` (category 연결), `Question`, `Option`
           — `ViewBlock` (text / list / image / table 유니언)
           — `QuestionView` ({ blocks: ViewBlock[] })
           — `QuestionWithOptions`, `QuizSet`, `QuizMode`
@@ -51,40 +50,64 @@
     - [x] `app/error.tsx` — 글로벌 에러 바운더리
     - [x] `next build` + `tsc --noEmit` 최종 통과 확인
 
-  - [x] Phase 1.5: 스키마 & 연동 검증 (테스트)
+  - [ ] Phase 1.5: 스키마 & 연동 검증 (테스트)
 
-    ### Test 1 — 환경 변수 로드 확인 (최소 단위)
-    - [x] `npm run dev` 실행 후 서버 기동 확인
-    - [x] `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` 가 undefined 아닌지 확인
+    ### 테스트 인프라
+    - [x] Vitest 환경 설정 (vitest.config.ts, workspace 분리)
+    - [x] 테스트 계층 아키텍처 설계 및 문서화 (`src/__tests__/CLAUDE.md`)
+    - [ ] 계층별 테스트 작성 가이드 (`src/__tests__/docs/WRITING_GUIDE.md`) 커밋
 
-    ### Test 2 — Supabase 클라이언트 연결
-    - [x] `createClient()` 호출 후 에러 없이 인스턴스 생성되는지 확인
-    - [x] `.from("exams").select("*")` 쿼리 실행 → 응답 status 200 확인
+    ### Unit 테스트
+    - [x] `AppError` — message·status·name 검증 (`unit/errors.test.ts`)
+    - [x] `cn()` — 클래스 병합·충돌·조건부 처리 검증 (`unit/utils.test.ts`)
 
-    ### Test 3 — 개별 테이블 read (단위별)
-    - [x] `exams` 테이블 select → 데이터 구조 Exam 타입과 일치 확인
-    - [x] `subjects` 테이블 select → Subject 타입 일치 확인
-    - [x] `questions` 테이블 select (limit 1) → Question 타입 일치 확인
-    - [x] `options` 테이블 select (limit 5) → Option 타입 일치 확인
+    ### Integration 테스트 — 연결 & 스키마
+    - [x] 환경 변수 존재 확인 (`connection.test.ts`)
+    - [x] `createClient()` 인스턴스 생성 확인 (`connection.test.ts`)
+    - [x] `exams` 테이블 select 성공 (`connection.test.ts`)
+    - [x] 각 테이블 타입 필드 일치 확인 (`tables.test.ts`: exams, subjects, exam_subjects, questions, options)
 
-    ### Test 4 — RLS 정책 검증
-    - [x] anon key로 `exams` insert 시도 → RLS 오류 반환 확인
-    - [x] anon key로 `questions` update 시도 → 거부 확인
+    ### Integration 테스트 — CRUD
+    - [x] service_role_key로 전 테이블 CRUD 검증 (`crud.test.ts`) — 34 tests pass
+    - [ ] `crud.test.ts` · `WRITING_GUIDE.md` 커밋
 
-    ### Test 5 — API 라우트 동작
-    - [x] `GET /api/[examId]` 호출 → `{ success: true, data: null }` 반환 확인
-    - [x] `examId` 없이 호출 → `{ success: false, error: "examId가 필요합니다." }` 확인
-
-    ### Test 6 — Storage 버킷 접근
-    - [x] `question-assets` 버킷 list 호출 → 접근 가능 확인
-    - [x] 버킷 public URL 형식 확인
-
-    ### Test 7 — 통합 흐름 (최대 단위)
-    - [x] exam → subjects → questions → options 순서로 join 조회
-    - [x] `QuestionWithOptions` 타입으로 정상 매핑되는지 확인
-    - [x] 전체 흐름이 server component에서 에러 없이 동작하는지 확인
+    ### API 테스트
+    - [x] `GET /api/[examId]` 정상 응답 형식 확인 (`api/examId.test.ts`)
+    - [x] 빈 `examId` → 400·에러 메시지 확인 (`api/examId.test.ts`)
 
   - [ ] Phase 2: UI 컴포넌트 구현
+
+    > 디자인 참조: `DESIGN.md` (프롬프트 모음) · `.design/` (출력물)
+
+    ### Step 1 — 디자인 토큰 설정
+    - [ ] `tailwind.config.ts` 색상 토큰 확장
+          (`navy: #1a1f36`, `accent: #4f6ef7`, `surface: #f8f9fc`)
+
+    ### Step 2 — 공통 컴포넌트
+    - [ ] `<Button>` — primary / outline / ghost 변형
+    - [ ] `<Badge>` — 카테고리 뱃지
+    - [ ] `<Card>` — 흰색 카드 (그림자·모서리 반경)
+
+    ### Step 3 — 홈 화면 `/`
+    - [ ] `<ExamCard>` — 시험 제목·배지·문항 수·난이도
+    - [ ] `<ExamGrid>` — 2열(데스크탑) / 1열(모바일) 반응형 그리드
+
+    ### Step 4 — 선택 페이지 `/quiz/[examId]`
+    - [ ] `<ModeToggle>` — 미니 퀴즈 / 모의고사 토글 카드
+    - [ ] `<SubjectChips>` — 가로 스크롤 칩 버튼 (연도·회차는 exam에 내재, 선택 불필요)
+    - [ ] 하단 고정 `<StartButton>`
+
+    ### Step 5 — 퀴즈 진행 `/quiz/[examId]/play`
+    - [ ] `<ProgressBar>` — 현재/전체 진행률
+    - [ ] `<Timer>` — MM:SS 카운트다운
+    - [ ] `<QuestionCard>` — 문제 텍스트 카드
+    - [ ] `<OptionButton>` — A/B/C/D 라벨 + 선택 상태
+
+    ### Step 6 — 결과 화면 `/result`
+    - [ ] `<ScoreGauge>` — 원형 점수 게이지 (카운트업 애니메이션)
+    - [ ] `<StatRow>` — 정답·오답·미응답 아이콘+숫자
+    - [ ] `<SubjectBarChart>` — 과목별 가로 막대 차트
+
   - [ ] Phase 3: 로직 & 상태 관리 (훅, 서비스)
   - [ ] Phase 4: 페이지 조립
   - [ ] Phase 5: 시각화 & 마무리

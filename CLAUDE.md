@@ -13,18 +13,30 @@
 
 ## 2. 아키텍처
 
-> Mermaid 다이어그램: 추후 사용자가 제공 예정. 폴더 구조는 확정 후 업데이트.
+**컴포넌트 구조:**
+
+shadcn/ui + 페이지 스코프 2레이어 구조.
+
+```
+components/
+  ui/        ← shadcn 범용 컴포넌트
+  layout/    ← 페이지별 레이아웃 컴포넌트
+  home/      ← /
+  exam/      ← /exam/[id]
+  play/      ← /exam/[id]/play
+  result/    ← /result
+```
 
 **라우팅:**
 
 | 경로                  | 역할                                           |
 | --------------------- | ---------------------------------------------- |
-| `/`                   | 홈 — Exam 목록 (exams.json, Server Component)  |
-| `/quiz/[examId]`      | 선택 페이지: 모드·연도·과목·회차 선택          |
-| `/quiz/[examId]/play` | 퀴즈 진행 (`?m=&sub=&year=&round=` query 포함) |
-| `/result`             | 결과 (sessionStorage로 전달)                   |
+| `/`               | 홈 — Exam 목록 (exams.json, Server Component)  |
+| `/exam/[id]`      | 선택 페이지: 모드·과목 선택 (연도·회차는 exam에 내재) |
+| `/exam/[id]/play` | 퀴즈 진행 (`?m=&sub=` query 포함)              |
+| `/result`         | 결과 (sessionStorage로 전달)                   |
 
-> `/quiz/[examId]/play?...` 구조 사용. quizsetId 기반 라우팅은 사용하지 않음.
+> `/exam/[id]/play?...` 구조 사용. quizsetId 기반 라우팅은 사용하지 않음.
 
 ---
 
@@ -109,4 +121,4 @@
 | 파일 | 용도 |
 | ---- | ---- |
 | `TODO.md` | 전체 작업 목록 |
-| `src/__tests__/CLAUDE.md` | 테스트 구조 및 실행 가이드 (테스트 작업 시 반드시 먼저 읽기) |
+| `src/__tests__/CLAUDE.md` | 테스트 아키텍처·작성 기준 (테스트 작업 시 반드시 먼저 읽기) |

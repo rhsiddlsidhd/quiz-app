@@ -1,62 +1,124 @@
-# 테스트 구조
+# 테스트 아키텍처 및 작성 기준
 
-## 테스트 계층
+이 문서는 이 프로젝트의 테스트를 어떻게 설계하고 작성해야 하는지 정의하는 기준 문서다.
+기존 코드를 설명하는 문서가 아니라, 앞으로 작성될 모든 테스트가 따라야 할 규약이다.
 
-| 계층 | 폴더 | 외부 의존성 | 목적 |
-|------|------|------------|------|
-| Unit | `unit/` | 없음 | 순수 함수/클래스 동작 확인 |
-| Integration | `integration/` | 실제 Supabase 연결 필요 | DB 연결·테이블·RLS·Storage 검증 |
-| API | `api/` | 없음 | API 라우트 핸들러 응답 형식 확인 |
+## 목차
+
+1. [핵심 규칙](#1-핵심-규칙)
+2. [계층 아키텍처](#2-계층-아키텍처)
+3. [테스트 범위·레벨 결정 기준](#3-테스트-범위레벨-결정-기준)
+4. [실행 명령어](#4-실행-명령어)
+5. [참조 문서](#5-참조-문서)
 
 ---
 
-## 실행 명령어
+## 1. 핵심 규칙
+
+| # | 규칙 | 근거 |
+|---|------|------|
+| 1 | 테스트는 구현 방법이 아닌 **동작 결과**를 검증한다 | 구현 세부사항을 검증하면 리팩토링 시 테스트가 깨지고, 실제 동작 보장이 되지 않음 |
+| 2 | 하나의 `it()`은 하나의 책임만 검증한다 | 여러 동작을 묶으면 실패 시 원인을 즉시 식별할 수 없고 연쇄 실패로 실제 원인이 묻힘 |
+| 3 | Integration 테스트에서는 실제 DB 동작을 검증한다 | mock은 실제 DB의 동작을 보장하지 않으므로, 실제 연결로만 정확성을 확인할 수 있음 |
+| 4 | API 테스트에서 실제 Supabase에 연결하지 않는다 | 응답 형식·에러 처리 검증이 목적이며, DB 동작은 Integration의 책임 범위 |
+| 5 | `as` 타입 단언을 사용하지 않는다 | 타입 체커를 우회해 스키마 변경이나 버그를 숨길 수 있음. 명시적 타입 변수 선언으로 대체 |
+| 6 | 삭제 테스트는 데이터가 존재하지 않음을 기준으로 검증한다 | 삭제 후 0행을 직접 확인해야 삭제 성공 여부를 명확히 판별할 수 있음 |
+| 7 | Integration 테스트 후에는 테스트 데이터를 반드시 정리한다 | 정리되지 않은 데이터가 누적되면 테스트 간 상태가 공유되어 결과를 신뢰할 수 없음 |
+| 8 | 타입 인터페이스 변경 시 관련 테스트를 함께 수정한다 | `src/types/index.ts`와 `tables.test.ts`가 동기화되지 않으면 스키마 불일치를 감지할 수 없음 |
+
+## 2. 계층 아키텍처
+
+이 프로젝트의 테스트는 **검증 대상이 다르기 때문에** 계층을 나눈다.
+계층이 다르면 사용하는 의존성, 실행 속도, 검증 범위가 달라진다.
+
+```
+┌─────────────────────────────────┐
+│  E2E          e2e/              │  브라우저 전체 흐름 (Phase 5 예정)
+├─────────────────────────────────┤
+│  Integration  integration/      │  실제 DB 동작 및 시스템 계약 검증
+│               api/              │
+├─────────────────────────────────┤
+│  Unit         unit/             │  외부 의존성 없는 순수 로직 검증
+└─────────────────────────────────┘
+```
+
+### 계층별 책임
+
+| 계층 | 폴더 | 검증 대상 | Supabase |
+|------|------|----------|:--------:|
+| Unit | `unit/` | 순수 함수·클래스의 입출력 | X |
+| Integration | `integration/` | 실제 DB 연결·스키마·CRUD | O |
+| Integration | `api/` | API 핸들러 응답 형식·에러 처리 계약 | mock |
+| E2E | `e2e/` | 브라우저 유저 플로우 전체 | O |
+
+### api/는 왜 Integration 계층인가
+
+`api/` 폴더는 실제 HTTP 네트워크를 타지 않고 핸들러 함수를 직접 호출하지만,
+**시스템 간 응답 계약(형식·상태 코드·에러 구조)을 검증한다는 점**에서 Integration 계층에 속한다.
+Supabase를 mock하는 것은 구현 방식의 차이일 뿐, 계층을 분리할 근거가 아니다.
+
+### 계층 간 원칙
+
+- 각 계층은 독립적으로 실행 가능해야 한다
+- Unit과 `api/`는 Supabase 없이 실행된다
+- 상위 계층이 실패해도 하위 계층 테스트는 영향받지 않는다
+
+## 3. 테스트 범위·레벨 결정 기준
+
+### 테스트 여부 결정
+
+테스트를 작성할지 말지는 외부 의존성이 아닌 아래 세 가지를 먼저 따진다.
+
+| 기준 | 질문 |
+|------|------|
+| 비즈니스 중요도 | 이 코드가 핵심 기능인가? |
+| 실패 시 영향 범위 | 깨졌을 때 문제가 큰가? |
+| 로직 복잡도 | 조건·분기·계산이 많은가? |
+
+중요도와 영향 범위가 높을수록 테스트 우선순위가 높아진다.
+
+### 테스트 레벨 결정
+
+테스트 여부가 결정됐다면, **외부 의존성**이 레벨을 결정한다.
+
+| 질문 | 레벨 |
+|------|------|
+| 외부 시스템을 실제로 쓰는가? | YES → Integration / NO → Unit |
+| 목적이 로직 검증인가, 연결 검증인가? | 로직 → Unit / 데이터 흐름 → Integration |
+| 브라우저(UI)가 포함되는가? | YES → E2E / NO → Integration |
+
+하나의 기능 안에서도 Unit과 Integration이 함께 존재할 수 있다.
+로직은 Unit으로, 실제 데이터 흐름은 Integration으로 분리해 검증한다.
+
+### 레벨별 검증 범위
+
+| 레벨 | 검증 범위 |
+|------|----------|
+| Unit | 외부 의존성을 완전히 끊고 순수 로직만 검증 |
+| Integration | 실제 DB·API를 사용해 서버 내부 데이터 흐름 검증 |
+| E2E | 브라우저(UI)부터 DB까지 사용자 관점의 전체 흐름 검증 |
+
+## 4. 실행 명령어
 
 ```bash
-npm run test:unit          # Unit 테스트만 (DB 불필요)
-npm run test:integration   # Integration 테스트 (Supabase 연결 필요)
-npm run test:api           # API 라우트 테스트
-npm run test               # 전체 실행 (배포 전)
-npm run test:watch         # 변경 감지 모드
-npm run test:coverage      # 커버리지 리포트
+npm run test              # 전체 실행 (배포 전 필수)
+npm run test:unit         # Unit만 (Supabase 불필요)
+npm run test:integration  # Integration만 (Supabase 연결 필요)
+npm run test:api          # API만 (Supabase 불필요)
+npm run test:watch        # 변경 감지 모드
+npm run test:coverage     # 커버리지 리포트
 ```
 
----
-
-## 각 테스트 파일 목적
-
-### Unit
-- `errors.test.ts` — `AppError` 클래스가 message/status/name을 올바르게 저장하는지
-- `utils.test.ts` — `cn()` 유틸이 클래스 병합·충돌 해결을 올바르게 처리하는지
-
-### Integration
-- `connection.test.ts` — 환경 변수 존재 확인, `createClient()` 정상 생성, `exams` select 성공
-- `tables.test.ts` — 각 테이블(`exams`, `subjects`, `questions`, `options`) select 후 TypeScript 타입 필드 일치 확인
-- `rls.test.ts` — anon key로 insert/update 시 RLS에 의해 거부되는지 확인
-- `storage.test.ts` — `question-assets` 버킷 list 접근 및 public URL 형식 확인
-- `flow.test.ts` — `exam → subjects → questions → options` 전체 흐름 조회, `QuestionWithOptions` 구조 확인
-
-### API
-- `examId.test.ts` — `GET /api/[examId]` 핸들러 직접 호출: 정상/빈 examId 응답 형식 확인
-
----
-
-## Integration 테스트 전제조건
-
-`.env.local` 파일이 프로젝트 루트에 있어야 합니다.
+Integration 테스트 실행 전 프로젝트 루트에 `.env.local`이 있어야 한다.
 
 ```
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+NEXT_PUBLIC_SUPABASE_URL=<Supabase 프로젝트 URL>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key>
+SUPABASE_SERVICE_ROLE_KEY=<service role key>
 ```
 
----
+## 5. 참조 문서
 
-## 새 테스트 추가 가이드
-
-| 추가할 내용 | 어느 계층에 넣을지 |
-|------------|-----------------|
-| 순수 함수, 유틸, 클래스 | `unit/` |
-| Supabase 쿼리, DB 정책, Storage | `integration/` |
-| API 라우트 핸들러 응답 형식 | `api/` |
-| 브라우저 유저 플로우 (미래) | `e2e/` (Playwright, Phase 5 예정) |
+| 문서 | 설명 | 경로 |
+|------|------|------|
+| WRITING_GUIDE | 계층별 테스트 작성 패턴 및 예시 | `src/__tests__/docs/WRITING_GUIDE.md` |

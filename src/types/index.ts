@@ -1,12 +1,15 @@
 // DB Row 타입
 export interface Exam {
   id: string;
+  category: string;
   name: string;
+  year: number;
+  round: number | null;
 }
 
 export interface Subject {
   id: string;
-  exam_id: string;
+  category: string;
   slug: string;
   name: string;
 }
@@ -25,12 +28,11 @@ export interface Question {
   id: string;
   exam_id: string;
   subject_id: string | null;
-  year: number;
-  round: number;
   number: number;
   content: string;
   view: QuestionView | null;
   explanation: string | null;
+  category: string | null;
 }
 
 export interface Option {
@@ -51,8 +53,6 @@ export interface QuestionWithOptions extends Question {
 export interface QuizSet {
   exam: Exam;
   subject?: Subject;
-  year: number;
-  round: number;
   mode: QuizMode;
   questions: QuestionWithOptions[];
 }

@@ -38,6 +38,32 @@ ExamLayout 헤더를 디자인해줘.
 - 하단 border 1px — Border Gray
 ```
 
+#### PlayLayout
+
+```
+PlayLayout 상단바를 디자인해줘.
+
+상단바 (sticky):
+- Near Black 배경, w-full
+- 선형 프로그레스 바 — Spotify Green fill, Near Black 배경, h-1
+- 우측: 현재/전체 문제 수 (Silver 12px) + 카운트다운 타이머 (MM:SS, White weight 700)
+- 하단 border 1px — Border Gray
+```
+
+#### ResultLayout
+
+```
+ResultLayout 헤더를 디자인해줘.
+
+헤더 (sticky):
+- Near Black 배경, w-full
+- 좌측: 다음/추천 시험명 또는 과목명 (White 14px)
+  - 미니퀴즈: 과목명 (예: "다음: 소방원론 2024년 2회")
+  - 모의고사: 회차 (예: "다음: 2024년 2회" / 마지막 회차면 이전 연도로)
+- 우측: "바로 풀기" CTA — Spotify Green Pill 버튼
+- 하단 border 1px — Border Gray
+```
+
 ### home/
 
 #### Home 본문
@@ -85,6 +111,74 @@ exam/ 본문을 디자인해줘.
 
 ### play/
 
+#### play/ 본문
+
+```
+play/ 본문을 디자인해줘.
+
+상단 바 (sticky):
+- 선형 프로그레스 바 — Spotify Green fill, Near Black 배경, 현재/전체 문제 수 우측 표시 (Silver 12px)
+- 우측: 카운트다운 타이머 (MM:SS) — White weight 700
+
+문제 영역:
+- Dark Surface 카드, 8px radius, 수직 패딩 24px
+- 문제 번호: Silver 12px
+- 문제 텍스트: White 18px weight 600
+
+보기 버튼 (세로 4개):
+- Near Black 배경, Border Gray 테두리, 8px radius
+- 좌측 라벨: A / B / C / D — Silver 14px weight 700, 우측 보기 내용: White 14px
+- 선택 시: Spotify Green 테두리
+
+하단 고정 네비게이션:
+- 이전: Outlined Pill 버튼 — White 텍스트, Border Gray 테두리
+- 다음: Spotify Green Pill 버튼 — 채워진 버튼
+```
+
 ### result/
+
+#### result/ 미니퀴즈 뷰
+
+```
+result/ 미니퀴즈 뷰를 디자인해줘.
+
+점수 요약 카드:
+- Dark Surface 배경, 8px radius, 수직 패딩 24px, 중앙 정렬
+- 정답률 % — White 32px weight 700
+- 맞은 수 / 전체 — Silver 14px
+
+문제별 결과:
+- flex-wrap 레이아웃 (아이템 크기에 따라 자연스럽게 줄바꿈)
+- 각 아이템: "N번 ✓" 또는 "N번 ✗" — Dark Surface 배경, 8px radius, 수평 패딩 12px
+- 정답 아이콘: Spotify Green / 오답 아이콘: 오답 Red
+
+하단 고정 CTA:
+- 좌측: Outlined Pill 버튼 — "다시풀기", White 텍스트, Border Gray 테두리
+- 우측: Spotify Green Pill 버튼 — "홈으로"
+```
+
+#### result/ 모의고사 뷰
+
+```
+result/ 모의고사 뷰를 디자인해줘.
+
+점수 요약 카드:
+- Dark Surface 배경, 8px radius, 수직 패딩 24px, 중앙 정렬
+- 총점 — White 32px weight 700 + 합격/불합격 Badge (Spotify Green / 오답 Red)
+- 합격선 텍스트 — Silver 12px
+
+과목별 점수:
+- 섹션 라벨: Silver 12px weight 700
+- 각 항목: 과목명 (White 14px) + 점수 (White 14px weight 700) + 진행 바 (Spotify Green fill, Near Black 배경)
+
+문제별 결과 (접기/펼치기 토글):
+- 섹션 헤더 클릭 시 토글
+- flex-wrap 레이아웃 (아이템 크기에 따라 자연스럽게 줄바꿈)
+- 각 아이템: "N번 ✓" 또는 "N번 ✗"
+
+하단 고정 CTA:
+- 좌측: Outlined Pill 버튼 — "다시풀기", White 텍스트, Border Gray 테두리
+- 우측: Spotify Green Pill 버튼 — "홈으로"
+```
 
 ### ui/

@@ -56,6 +56,7 @@ describe("questions 테이블", () => {
       expect(typeof row.exam_id).toBe("string");
       expect(typeof row.number).toBe("number");
       expect(typeof row.content).toBe("string");
+      expect(row.category === null || typeof row.category === "string").toBe(true);
     }
   });
 });

@@ -32,6 +32,7 @@ export interface Question {
   content: string;
   view: QuestionView | null;
   explanation: string | null;
+  category: string | null;
 }
 
 export interface Option {

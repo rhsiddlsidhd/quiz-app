@@ -81,7 +81,7 @@
 
     ### Step 1 — PDF 파싱 환경 구성
     - [ ] `pdf-parse` 또는 `pdfjs-dist` 설치
-    - [x] `.pdf/` 폴더 생성 (PDF 파일 저장 위치, gitignore 적용)
+    - [x] `pdf/` 폴더 생성 (PDF 파일 저장 위치, gitignore 적용)
     - [ ] `scripts/parse-pdf.ts` 작성 — PDF 텍스트 추출 기본 틀
 
     ### Step 2 — 텍스트 → 구조화 변환

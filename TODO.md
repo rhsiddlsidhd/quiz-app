@@ -75,6 +75,29 @@
     - [x] `GET /api/[examId]` 정상 응답 형식 확인 (`api/examId.test.ts`)
     - [x] 빈 `examId` → 400·에러 메시지 확인 (`api/examId.test.ts`)
 
+  - [ ] Phase 1.6: PDF → DB 데이터 파이프라인
+
+    > 대상: 스포츠지도사 시험지 PDF (로컬 `scripts/pdfs/`)
+
+    ### Step 1 — PDF 파싱 환경 구성
+    - [ ] `pdf-parse` 또는 `pdfjs-dist` 설치
+    - [x] `pdf/` 폴더 생성 (PDF 파일 저장 위치, gitignore 적용)
+    - [ ] `scripts/parse-pdf.ts` 작성 — PDF 텍스트 추출 기본 틀
+
+    ### Step 2 — 텍스트 → 구조화 변환
+    - [ ] 문항 번호, 문제 본문, 선택지 파싱 로직 작성
+    - [ ] `ViewBlock` 형식에 맞게 변환 (text / list / image)
+    - [ ] 중간 JSON 출력 (`scripts/output/[examId].json`) 으로 검토
+
+    ### Step 3 — DB 삽입 스크립트
+    - [ ] `scripts/seed-from-json.ts` — JSON → Supabase upsert
+          (exams / subjects / exam_subjects / questions / options 순서)
+    - [ ] 멱등성 보장 (upsert, 중복 실행 안전)
+
+    ### Step 4 — 검증
+    - [ ] 삽입 후 DB 데이터 정합성 확인
+    - [ ] 파싱 오류 항목 수동 보정
+
   - [ ] Phase 2: UI 컴포넌트 구현
 
     > 디자인 참조: `DESIGN.md` (프롬프트 모음) · `.design/` (출력물)

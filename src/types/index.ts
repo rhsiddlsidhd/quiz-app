@@ -27,32 +27,57 @@ export interface QuestionView {
 export interface Question {
   id: string;
   exam_id: string;
-  subject_id: string | null;
+  subject_id: string;
   number: number;
   content: string;
   view: QuestionView | null;
-  explanation: string | null;
-  category: string | null;
+  explanation: string;
+  category: string;
 }
+
+export type OptionBlock =
+  | { type: "text"; content: string }
+  | { type: "image"; url: string; alt?: string };
 
 export interface Option {
   id: string;
   question_id: string;
   number: number;
-  value: string;
+  value: OptionBlock;
   is_answer: boolean;
 }
 
 // 앱 레벨 조합 타입
-export type QuizMode = "mini" | "mock";
-
 export interface QuestionWithOptions extends Question {
   options: Option[];
 }
 
 export interface QuizSet {
   exam: Exam;
-  subject?: Subject;
-  mode: QuizMode;
+  subject: Subject;
   questions: QuestionWithOptions[];
+}
+
+export interface CategoryStat {
+  category: string;
+  total: number;
+  wrong: number;
+}
+
+export interface WrongQuestion {
+  question: QuestionWithOptions;
+  selectedOptionId: string;
+}
+
+export interface QuizResult {
+  id: string;
+  timestamp: number;
+  exam: Exam;
+  subject: Subject;
+  score: {
+    correct: number;
+    total: number;
+  };
+  wrongQuestions: WrongQuestion[];
+  categoryStats: CategoryStat[];
 }

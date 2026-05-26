@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(Get-ChildItem -Path C:\\\\sideprojects\\\\quiz-app -Depth 2 -Name)",
-      "Bash(Select-String \"\\\\.css$|\\\\.tsx$|\\\\.ts$\")"
-    ]
-  }
-}

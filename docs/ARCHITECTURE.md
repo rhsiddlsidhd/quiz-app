@@ -21,6 +21,8 @@ src/
     layout/             ← 레이아웃 컴포넌트
     {page}/             ← 페이지 전용 컴포넌트 (라우트명과 동일)
   hooks/                ← 클라이언트 상태 훅 (use{Name}.ts)
+  context/              ← React Context
+  store/                ← zustand 전역 상태
   lib/
     services/           ← Supabase 쿼리 함수
     supabase/           ← Supabase 클라이언트 (server-side only)

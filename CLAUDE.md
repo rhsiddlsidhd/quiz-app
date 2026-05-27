@@ -1,124 +1,127 @@
 # CLAUDE.md
 
-## 1. 절대규칙
+## 절대규칙
 
-- 승인 없이 파일 생성 금지
-- 자동 커밋/푸시 금지
-- `as` 타입 단언 사용 금지
-- 요청 범위 밖 코드 수정 금지
-- 불명확한 요구사항은 구현 전 반드시 질문
-- env 파일 접근 금지
+- Supabase 클라이언트는 server-side only (`@/lib/supabase/server.ts`) — 클라이언트 컴포넌트에서 직접 쿼리 금지
 
 ---
 
-## 2. 아키텍처
-
-**컴포넌트 구조:**
-
-shadcn/ui + 페이지 스코프 2레이어 구조.
-
-```
-components/
-  ui/        ← shadcn 범용 컴포넌트
-  layout/    ← 페이지별 레이아웃 컴포넌트
-  home/      ← /
-  exam/      ← /exam/[id]
-  play/      ← /exam/[id]/play
-  result/    ← /result
-```
-
-**라우팅:**
-
-| 경로                  | 역할                                           |
-| --------------------- | ---------------------------------------------- |
-| `/`               | 홈 — Exam 목록 (exams.json, Server Component)  |
-| `/exam/[id]`      | 선택 페이지: 모드·과목 선택 (연도·회차는 exam에 내재) |
-| `/exam/[id]/play` | 퀴즈 진행 (`?m=&sub=` query 포함)              |
-| `/result`         | 결과 (sessionStorage로 전달)                   |
-
-> `/exam/[id]/play?...` 구조 사용. quizsetId 기반 라우팅은 사용하지 않음.
-
----
-
-## 3. 기술 스택
+## 기술 스택
 
 - Next.js (App Router)
 - TypeScript
 - Tailwind CSS
 - ESLint (import/order 포함)
-- clsx / cn() 유틸
 - Supabase (PostgreSQL + Storage)
+- zustand (전역 상태)
 
 ---
 
-## Build & Test Commands
+## 빌드 & 테스트
 
-- Build: `npm run build`
-- Lint: `npm run lint`
+```bash
+npm run build        # 빌드
+npx tsc --noEmit     # 타입 체크
+npm run lint         # 린트
+npm run test         # 전체 테스트
+```
 
 ---
 
-## 5. 도메인 컨텍스트
-
----
-
-## 6. 코딩 컨벤션
+## 코딩 컨벤션
 
 **타입 시스템:**
 
-- `interface`: 객체 형태 정의 — 도메인 모델, API 응답, Props
-  ```ts
-  interface QuizCardProps {
-    id: number;
-    title: string;
-  }
-  interface Exam {
-    id: number;
-    name: string;
-  }
-  ```
-- `type`: 유니언, 리터럴, 유틸리티 타입 조합
-  ```ts
-  type QuizMode = "mini" | "mock";
-  type Status = "idle" | "loading" | "error";
-  type PartialExam = Pick<Exam, "id" | "name">;
-  ```
+- `interface` — 객체 형태: 도메인 모델, API 응답, Props
+- `type` — 유니언, 리터럴, 유틸리티 타입 조합
+
+**타입 파일 구조:**
+
+```
+types/
+  exam.ts    ← Exam, Subject
+  quiz.ts    ← Question, Option, ViewBlock, OptionBlock, QuestionView, QuestionWithOptions, QuizSet
+  result.ts  ← QuizResult, WrongQuestion, CategoryStat
+  ui.ts      ← 공통 UI Props
+  index.ts   ← re-export만
+```
+
+- 컴포넌트 전용 Props → 해당 컴포넌트 파일 내 선언
 
 **함수/컴포넌트:**
 
 - 함수: arrow function
 - 컴포넌트: `export default`
 
-**경로/스타일:**
+**네이밍:**
 
-- 경로 alias: `@/`
-- 스타일 유틸: `cn()` / `clsx`
+| 대상               | 규칙             | 예시                       |
+| ------------------ | ---------------- | -------------------------- |
+| 컴포넌트 파일·함수 | PascalCase       | `ExamCard.tsx`, `ExamCard` |
+| 상수               | UPPER_SNAKE_CASE | `MAX_QUIZ_COUNT`           |
+| 변수·일반 함수     | camelCase        | `examList`, `getExams`     |
 
-**import 순서 (ESLint `import/order`):**
+**`'use client'` 선언 기준:**
 
-1. React/Next
-2. 외부 라이브러리
-3. 내부 절대경로 (`@/`)
-4. 상대경로
+- 이벤트 핸들러 사용 시
+- `useState` / `useEffect` 등 React 훅 사용 시
+- `window`, `document`, `localStorage` 등 Browser API 직접 사용 시
+
+**Props 인터페이스 위치:**
+
+- 해당 컴포넌트 전용 → 컴포넌트 파일 내 선언
+- 여러 곳에서 공유되는 범용 → `@/types/*.ts` 도메인 기준 파일로 이동 또는 생성
+
+**스타일:**
+
+- 클래스 조합은 항상 `cn()` 사용 (`clsx` + `tailwind-merge` 래퍼)
+
+**상태 관리:**
+
+- `useState` → 컴포넌트/훅 내 로컬 상태
+- `useContext` → 단일 페이지 트리 내 공유 (리렌더 최적화 불필요한 경우)
+- `zustand` → 페이지 간 유지가 필요하거나 리렌더 최적화가 필요한 전역 상태
+
+**훅 설계:**
+
+- 네이밍: camelCase + `use` prefix 필수, 이름만 보고 무엇을 반환하는지 알 수 있어야 한다
+
+추출 기준:
+
+- 상태 + 핸들러가 있을 때
+- 상태 + effect가 있을 때
+- 하나의 관심사로 묶이는 여러 상태일 때
+
+묶음 기준:
+
+- 두 훅의 output이 서로 의존하면 하나로 묶는다
+- 독립적이면 분리한다
+
+컴포넌트 내 허용:
+
+- 단일 상태, 핸들러 없음, 파생 로직 없음
 
 ---
 
-## 7. 핵심 패턴
+## API
 
-- 데이터 페칭은 Server Component에서만
-- 클라이언트 상태는 훅으로 캡슐화
-- API 응답 형식: `{ success: boolean, data?: T, error?: string }`
-- API 에러는 반드시 `AppError` 클래스로 통일 (`./errors.ts`)
+- 응답 형식: `{ success: boolean, data?: T, error?: string }`
+
+---
+
+## 에러 처리
+
+- API 에러는 반드시 `AppError` 클래스로 통일 (`@/lib/errors.ts`)
 - 에러 처리는 `error.tsx` / `ErrorBoundary` 사용
-- Supabase 클라이언트는 server-side only (`@/lib/supabase/server.ts`). 클라이언트 컴포넌트에서 직접 Supabase 쿼리 금지
-
-세부 구현은 각 하위 `CLAUDE.md` 참조.
 
 ---
 
-## 8. 참조문서
+## 참조문서
 
-| 파일 | 용도 |
-| ---- | ---- |
-| `TODO.md` | 전체 작업 목록 |
-| `src/__tests__/CLAUDE.md` | 테스트 아키텍처·작성 기준 (테스트 작업 시 반드시 먼저 읽기) |
+| 파일                                                 | 용도                                  |
+| ---------------------------------------------------- | ------------------------------------- |
+| [`docs/OVERVIEW.md`](docs/OVERVIEW.md)               | 프로젝트 목적·도메인·핵심 흐름        |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)       | 레이어 구조·폴더·라우팅·컴포넌트 계층 |
+| [`docs/DB_SCHEMA.md`](docs/DB_SCHEMA.md)             | DB 테이블 정의·관계·RLS               |
+| [`docs/GIT_STRATEGY.md`](docs/GIT_STRATEGY.md)       | Git 전략·브랜치 흐름·worktree 규칙    |
+| [`src/__tests__/CLAUDE.md`](src/__tests__/CLAUDE.md) | 테스트 아키텍처·작성 기준             |

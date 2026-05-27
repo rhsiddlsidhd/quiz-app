@@ -116,12 +116,22 @@ types/
 
 ---
 
+## 프로젝트 개요
+
+@docs/OVERVIEW.md
+
+---
+
+## 아키텍처
+
+@docs/ARCHITECTURE.md
+
+---
+
 ## 참조문서
 
-| 파일                                                 | 용도                                  |
-| ---------------------------------------------------- | ------------------------------------- |
-| [`docs/OVERVIEW.md`](docs/OVERVIEW.md)               | 프로젝트 목적·도메인·핵심 흐름        |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)       | 레이어 구조·폴더·라우팅·컴포넌트 계층 |
-| [`docs/DB_SCHEMA.md`](docs/DB_SCHEMA.md)             | DB 테이블 정의·관계·RLS               |
-| [`docs/GIT_STRATEGY.md`](docs/GIT_STRATEGY.md)       | Git 전략·브랜치 흐름·worktree 규칙    |
-| [`src/__tests__/CLAUDE.md`](src/__tests__/CLAUDE.md) | 테스트 아키텍처·작성 기준             |
+| 파일                                                 | 용도                      | 읽는 시점                   |
+| ---------------------------------------------------- | ------------------------- | --------------------------- |
+| [`docs/GIT_STRATEGY.md`](docs/GIT_STRATEGY.md)       | Git 전략·브랜치 흐름·worktree 규칙 | Git 작업 시작 전     |
+| [`docs/DB_SCHEMA.md`](docs/DB_SCHEMA.md)             | DB 테이블 정의·관계·RLS   | DB·쿼리·스키마 작업 시작 전  |
+| [`src/__tests__/CLAUDE.md`](src/__tests__/CLAUDE.md) | 테스트 아키텍처·작성 기준 | 테스트 작성 시작 전          |

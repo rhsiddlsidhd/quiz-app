@@ -1,8 +1,23 @@
 # Project Overview
 
-## 목적
+## 배경 및 목적
 
-객관식 퀴즈 앱.
+자격증·공무원 등 각종 시험을 준비하는 사람들이 기출문제를 반복적으로 풀어볼 수 있는 객관식 퀴즈 앱.
+
+---
+
+## 타겟 사용자
+
+시험을 준비하는 수험생. 기출문제를 효율적으로 풀고 자신의 취약 유형을 파악하고 싶은 사람.
+
+---
+
+## 핵심 가치
+
+- 시험별·과목별로 문제를 선택해서 풀 수 있다
+- 퀴즈가 끝나면 점수와 틀린 문제를 바로 확인할 수 있다
+- 어떤 유형의 문제를 많이 틀렸는지 분석해준다
+- 최근 풀었던 결과를 다시 볼 수 있다
 
 ---
 
@@ -10,9 +25,9 @@
 
 | 개념         | 설명                                                                                                      |
 | ------------ | --------------------------------------------------------------------------------------------------------- |
-| `Exam`       | 시험 단위. title·year·round(nullable)로 구분                                                              |
+| `Exam`       | 시험 단위. name·year·round(nullable)로 구분                                                               |
 | `Subject`    | 과목. Exam에 여러 개 존재. 퀴즈 시작 시 단일 선택 필수                                                    |
-| `Question`   | 문제. 지문은 ViewBlock 배열(text·list·image·table). category(자유 텍스트) 1개 보유. explanation 항상 존재 |
+| `Question`   | 문제. 지문은 ViewBlock 배열(text·list·image·table·labeled-list). category(자유 텍스트) 1개 보유. explanation 항상 존재 |
 | `Option`     | 보기. OptionBlock(text \| image) 형태. 정답 여부(is_answer) 포함                                          |
 | `QuizSet`    | 퀴즈 진행 단위. Exam + Subject + questions 조합                                                           |
 | `QuizResult` | 퀴즈 결과 단위. 점수·틀린 문제 목록·과목별 유형 분석 포함. localStorage에 저장                            |
@@ -31,6 +46,8 @@
           → /result
               → 결과 확인 (점수·오답 목록·유형 분석)
               → localStorage 저장
+              → /history
+                  → 최근 10회 퀴즈 결과 목록
 ```
 
 ---

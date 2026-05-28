@@ -28,6 +28,23 @@
 - worktree 디렉토리명에 브랜치명을 반영한다
 - 같은 브랜치를 두 worktree에 동시에 체크아웃하지 않는다
 
+### Worktree 생성
+
+새 브랜치를 만들면서 worktree를 생성할 때는 반드시 `-b` 플래그를 사용한다.
+존재하지 않는 브랜치명을 `-b` 없이 지정하면 `invalid reference` 에러가 발생한다.
+
+```bash
+# 새 브랜치 + worktree 동시 생성 (기반 브랜치에서 분기)
+git worktree add -b <브랜치명> <경로> <기반브랜치>
+
+# 예시
+git worktree add -b docs/update-notion-docs ../quiz-app-docs-update-notion dev
+git worktree add -b feat/some-feature ../quiz-app-feat-some-feature dev
+
+# 이미 존재하는 브랜치를 체크아웃할 때는 -b 없이 사용
+git worktree add <경로> <브랜치명>
+```
+
 ### Worktree 정리 워크플로우
 
 ```mermaid

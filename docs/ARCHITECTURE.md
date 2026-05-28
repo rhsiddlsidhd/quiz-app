@@ -12,10 +12,12 @@ Supabase → Service → API/Server Component → UI 순서의 단방향 의존 
 ```
 src/
   app/                  ← Next.js App Router 페이지 및 API
-    api/exam/[id]/      ← 퀴즈셋 API Route
+    api/exams/          ← 시험 목록 API Route
+    api/exam/[id]/      ← 과목 목록 및 퀴즈셋 API Route
     exam/[id]/          ← 과목 선택 페이지
     exam/[id]/play/     ← 퀴즈 진행 페이지
     result/             ← 결과 페이지
+    history/            ← 최근 퀴즈 결과 목록 페이지
   components/
     ui/                 ← 범용 UI 컴포넌트
     layout/             ← 레이아웃 컴포넌트
@@ -51,10 +53,11 @@ src/
 
 | 경로 | 역할 |
 | ---- | ---- |
-| `/` | 홈 — Exam 목록 (Server Component) |
+| `/` | 홈 — 이미지 캐러셀 + 카테고리 필터 + 시험 목록 표시 (Server Component) |
 | `/exam/[id]` | 과목 선택 |
 | `/exam/[id]/play?sub=<uuid>` | 퀴즈 진행 |
 | `/result` | 결과 확인 |
+| `/history` | 최근 퀴즈 결과 목록 |
 
 **쿼리 파라미터:**
 
